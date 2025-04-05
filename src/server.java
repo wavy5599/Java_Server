@@ -1,117 +1,83 @@
-import java.io.*;         // For input/output handling (reading/writing)
-import java.net.*;        // For networking (ServerSocket, Socket)
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 
-// Our main class — this is the entry point of the app
+// Main class for the Java web server
 public class server {
     public static void main(String[] args) throws IOException {
-
-        // Create a ServerSocket that listens on port 8080 (standard HTTP port)
+        // Create a server socket listening on port 8080
         ServerSocket serverSocket = new ServerSocket(8080);
+        System.out.println("✅ Server started on http://localhost:8080");
 
-        // Let us know the server is up and running
-        System.out.println("Server started on http://localhost:8080");
-
-        // Infinite loop — keeps the server running to accept multiple requests
+        // Continuously accept incoming client connections
         while (true) {
-
-            // Wait for a client (like a web browser) to connect
+            // Accept an incoming connection from a client
             Socket clientSocket = serverSocket.accept();
 
-            // Create a reader to get the request from the browser
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(clientSocket.getInputStream())
-            );
+            // Create input reader to read request from client
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-            // Create a writer to send back a response to the browser
+            // Create output writer to send response to client
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream());
 
-            // Read the first line of the HTTP request (usually looks like "GET / HTTP/1.1")
+            // Read the first line of the client's request (e.g., "GET / HTTP/1.1")
             String requestLine = in.readLine();
-            System.out.println("Request: " + requestLine); // Log it
+            System.out.println("📥 Request: " + requestLine);
 
-            // Send HTTP response headers first (MUST come before HTML!)
+            // Send basic HTTP headers
             out.println("HTTP/1.1 200 OK");
-            out.println("Content-Type: text/html; charset=UTF-8"); // ✅ Proper UTF-8 header
-            out.println(""); // 🔚 This blank line separates headers from the HTML body
+            out.println("Content-Type: text/html; charset=UTF-8");
+            out.println("");
 
-// Start of HTML document
-            out.println("<!DOCTYPE html>");
-            out.println("<html><head>");
-            out.println("<meta charset=\"UTF-8\">"); // Extra UTF-8 safety in the HTML itself
+            // Handle the /about page
+            if (requestLine.contains("GET /about")) {
+                out.println("<html><head><meta charset='UTF-8'><title>About</title>");
+                out.println("<style>");
+                out.println("body { background: #f4f4f4; color: #333; font-family: Arial, sans-serif; animation: fadeIn 1s ease-in; padding: 40px; }");
+                out.println("@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }");
+                out.println("</style></head><body>");
+                out.println("<h1>About Our Application</h1>");
+                out.println("<p>This is a demonstration of a clean, professional Java-based server.</p>");
+                out.println("<p><a href='/'>Back to Home</a></p>");
+                out.println("</body></html>");
 
-// CSS styles
-            out.println("<style>");
-            out.println("body {");
-            out.println("  font-family: 'Segoe UI', sans-serif;");
-            out.println("  background-color: #121212;");
-            out.println("  color: #f5f5f5;");
-            out.println("  margin: 0;");
-            out.println("  padding: 0;");
-            out.println("  text-align: center;");
-            out.println("}");
+                // Handle the /contact page
+            } else if (requestLine.contains("GET /contact")) {
+                out.println("<html><head><meta charset='UTF-8'><title>Contact</title>");
+                out.println("<style>");
+                out.println("body { background-color: #fff; color: #222; font-family: 'Segoe UI', sans-serif; padding: 40px; }");
+                out.println("form { max-width: 400px; margin: auto; display: flex; flex-direction: column; gap: 10px; }");
+                out.println("input, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }");
+                out.println("button { background-color: #007BFF; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; }");
+                out.println("button:hover { background-color: #0056b3; }");
+                out.println("</style></head><body>");
+                out.println("<h1>Contact Us</h1>");
+                out.println("<form><input type='text' placeholder='Your Name'><input type='email' placeholder='Your Email'><textarea placeholder='Your Message'></textarea><button type='submit'>Send</button></form>");
+                out.println("<p><a href='/'>Back to Home</a></p>");
+                out.println("</body></html>");
 
-            out.println("nav {");
-            out.println("  background-color: #1f1f1f;");
-            out.println("  padding: 15px;");
-            out.println("}");
+                // Default homepage
+            } else {
+                out.println("<html><head><meta charset='UTF-8'><title>Home</title>");
+                out.println("<style>");
+                out.println("body { background: linear-gradient(to right, #ffffff, #e6e6e6); color: #000; font-family: 'Helvetica Neue', sans-serif; padding: 60px; text-align: center; }");
+                out.println("nav a { color: #007BFF; margin: 0 15px; text-decoration: none; font-weight: bold; transition: color 0.3s; }");
+                out.println("nav a:hover { color: #0056b3; }");
+                out.println("</style></head><body>");
+                out.println("<h1>Welcome to Our Java Server</h1>");
+                out.println("<p>Explore the features of a clean and professional server implementation.</p>");
+                out.println("<nav>");
+                out.println("<a href='/about'>About</a> | ");
+                out.println("<a href='/contact'>Contact</a>");
+                out.println("</nav>");
+                out.println("</body></html>");
+            }
 
-            out.println("nav a {");
-            out.println("  margin: 0 15px;");
-            out.println("  color: #00ffcc;");
-            out.println("  text-decoration: none;");
-            out.println("  font-weight: bold;");
-            out.println("  transition: color 0.3s ease;");
-            out.println("}");
-
-            out.println("nav a:hover {");
-            out.println("  color: #ff00cc;");
-            out.println("}");
-
-            out.println(".container {");
-            out.println("  max-width: 800px;");
-            out.println("  margin: 80px auto;");
-            out.println("  padding: 20px;");
-            out.println("  background-color: #1e1e1e;");
-            out.println("  border-radius: 12px;");
-            out.println("  box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);");
-            out.println("}");
-
-            out.println("footer {");
-            out.println("  margin-top: 50px;");
-            out.println("  font-size: 12px;");
-            out.println("  color: #777;");
-            out.println("}");
-            out.println("</style>");
-            out.println("</head><body>");
-
-// Navigation Bar
-            out.println("<nav>");
-            out.println("<a href='/'>Home</a>");
-            out.println("<a href='/about'>About</a>");
-            out.println("<a href='/projects'>Projects</a>");
-            out.println("<a href='/contact'>Contact</a>");
-            out.println("</nav>");
-
-// Main Content
-            out.println("<div class='container'>");
-            out.println("<h1>🚀 Welcome to David’s Java Server Site</h1>");
-            out.println("<p>You’re looking at a live webpage generated by raw Java code.<br>No frameworks. No shortcuts. Just pure skill.</p>");
-            out.println("</div>");
-
-// Footer
-            out.println("<footer>");
-            out.println("<p>&copy; 2025 David M. | Powered by Java + Passion</p>");
-            out.println("</footer>");
-
-// Close HTML
-            out.println("</body></html>");
-
-
-
-            // Make sure everything gets sent
+            // Send response and close connection
             out.flush();
-
-            // Close the connection to that browser — it's done
             clientSocket.close();
         }
     }
